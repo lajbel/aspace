@@ -24,8 +24,6 @@ function postScore(board_name, score_value) {
     }
 }
 
-postScore("Points", 1234)
-
 // Initiate Kaboom canvas
 
 kaboom({
