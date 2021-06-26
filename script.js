@@ -1,8 +1,6 @@
-/*
-
 // NG API 
 
-var ngio = new Newgrounds.io.core("secrets");
+var ngio = new Newgrounds.io.core("secretid", "secrettoken");
 
 var scoreboards;
 
@@ -27,8 +25,6 @@ function postScore(board_name, score_value) {
 }
 
 postScore("Points", 1234)
-
-*/
 
 // Initiate Kaboom canvas
 
@@ -75,11 +71,56 @@ loadSound("boom", "./sounds/explosion.wav");
 loadSound("hit", "./sounds/hit.wav");
 loadSound("sot", "./sounds/saber_of_truth.mp3");
 
+// Tutorial scene
+
+scene("tutorial", () => {
+	add([
+		text("Keys", 30),
+		pos(width() / 2, 40),
+		origin("center")
+	])
+
+	add([
+		text("Arrows - Move", 15),
+		pos(width() / 2, 90),
+		origin("center")
+	])
+
+	add([
+		text("Backspace - Shoot", 15),
+		pos(width() / 2, 110),
+		origin("center")
+	])
+
+	add([
+		text("Destroy the trash", 8),
+		pos(width() / 2, 150),
+		origin("center")
+	])
+
+	add([
+		text('500 points for the "final"', 8),
+		pos(width() / 2, 160),
+		origin("center")
+	])
+
+	add([
+		text("Backspace for start!", 13),
+		pos(width() / 2, height() - 30),
+		origin("center")
+	])
+
+	keyDown("space", () => {
+		go("main");
+	})
+})
+
+start("tutorial")
 // Main scene
 
-scene("main", (args = {}) => {
+scene("main", () => {
 	layers(["bg", "ewws", "game", "ui"], "game");
-	volume(0.5);
+	volume(1);
 	camIgnore(["ui"]);
 
 	const bulletSpeed = 300;
@@ -152,6 +193,7 @@ scene("main", (args = {}) => {
 
 		if (player.pos.x < 0) {
 			camShake(15);
+			postScore("Scores", score.value);
 			player.changeSprite("explosion");
 			player.play("main");
 			music.stop()
@@ -243,12 +285,12 @@ scene("main", (args = {}) => {
 	player.collides("trash", (p) => {
 		destroy(p);
 		camShake(15);
-		// postScore("Scores", score.value);
+		postScore("Scores", score.value);
 		player.changeSprite("explosion");
 		player.play("main");
 		music.stop()
 		play("boom", {
-			volume: 0.5
+			volume: 0.4
 		});
 
 		wait(0.3, () => {
@@ -309,7 +351,7 @@ scene("main", (args = {}) => {
 	keyPress("space", () => {
 		if (player.exists()) {
 			play("piu", {
-				volume: 0.4
+				volume: 0.3
 			});
 			shoot(player.pos);
 		}
