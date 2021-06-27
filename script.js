@@ -1,35 +1,3 @@
-// NG API 
-
-/* 
-
-var ngio = new Newgrounds.io.core("secretid", "secrettoken");
-
-var scoreboards;
-
-function onScoreboardsLoaded(result) {
-    if (result.success) scoreboards = result.scoreboards;
-}
-
-ngio.queueComponent("ScoreBoard.getBoards", {}, onScoreboardsLoaded);
-ngio.executeQueue();
-
-function postScore(board_name, score_value) {
-    if (!ngio.user) return;
-
-    var score;
-
-    for (var i = 0; i < scoreboards.length; i++) {
-
-        scoreboard = scoreboards[i];
-
-        ngio.callComponent('ScoreBoard.postScore', {id:scoreboard.id, value:score_value});
-    }
-}
-
-*/
-
-// Initiate Kaboom canvas
-
 kaboom({
 	global: true,
 	width: 330,
@@ -83,7 +51,7 @@ scene("tutorial", () => {
 	])
 
 	add([
-		text("Arrows - Move", 15),
+		text("Arrows or Wasd - Move", 15),
 		pos(width() / 2, 90),
 		origin("center")
 	])
@@ -208,7 +176,8 @@ scene("main", () => {
 			})
 
 			wait(1.7, () => {
-				go("main");
+				if(score.value > 100) go("lose", {score:score.value});
+				else go("main");
 			})
 		}
 	})
@@ -235,7 +204,7 @@ scene("main", () => {
 				layer("ui")
 			])
 
-			wait(2, () => {
+			wait(5, () => {
 				destroy(winText)
 			})
 		}
@@ -300,7 +269,8 @@ scene("main", () => {
 		})
 
 		wait(1.7, () => {
-			go("main");
+			if(score.value > 100) go("lose", {score:score.value});
+			else go("main");
 		})
 	})
 
@@ -320,9 +290,9 @@ scene("main", () => {
 		score.text = score.value;
 	})
 
-	// Move player
+	// Input
 
-	keyDown("up", () => {
+	keyDown(["up", "w"], () => {
 		player.move(0, -player.speed);
 
 		if (player.pos.y < 0) {
@@ -330,7 +300,7 @@ scene("main", () => {
 		}
 	})
 
-	keyDown("down", () => {
+	keyDown(["down", "s"], () => {
 		player.move(0, player.speed)
 
 		if (player.pos.y > height()) {
@@ -338,13 +308,13 @@ scene("main", () => {
 		}
 	})
 
-	keyDown("right", () => {
+	keyDown(["right", "d"], () => {
 		if (player.pos.x < width() - 100) {
 			player.move(player.speed, 0);
 		}
 	})
 
-	keyDown("left", () => {
+	keyDown(["left", "a"], () => {
 		if (player.pos.x > 15) {
 			player.move(-player.speed, 0);
 		}
@@ -360,4 +330,20 @@ scene("main", () => {
 	})
 });
 
-start("main");
+scene("lose", ({score}) => {
+	add([
+		text("Your Score: " + score, 12),
+		origin("center"),
+		pos(width() / 2, 100),
+	]);
+
+	add([
+		text("Spacebar to restart", 16),
+		origin("center"),
+		pos(width() / 2, 200)
+	])
+
+	keyPress("space", () => {
+		go("main");
+	})
+})
