@@ -1,5 +1,7 @@
 // NG API 
 
+/* 
+
 var ngio = new Newgrounds.io.core("secretid", "secrettoken");
 
 var scoreboards;
@@ -23,6 +25,8 @@ function postScore(board_name, score_value) {
         ngio.callComponent('ScoreBoard.postScore', {id:scoreboard.id, value:score_value});
     }
 }
+
+*/
 
 // Initiate Kaboom canvas
 
@@ -191,7 +195,7 @@ scene("main", () => {
 
 		if (player.pos.x < 0) {
 			camShake(15);
-			postScore("Scores", score.value);
+			// postScore("Scores", score.value);
 			player.changeSprite("explosion");
 			player.play("main");
 			music.stop()
@@ -283,7 +287,7 @@ scene("main", () => {
 	player.collides("trash", (p) => {
 		destroy(p);
 		camShake(15);
-		postScore("Scores", score.value);
+		// postScore("Scores", score.value);
 		player.changeSprite("explosion");
 		player.play("main");
 		music.stop()
