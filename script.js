@@ -5,8 +5,7 @@ kaboom({
 	scale: 2,
 	clearColor: [0, 0, 0, 5],
 	fullscreen: false,
-	crisp: true,
-	debug: false
+	debug: true,
 });
 
 // Load sprites
@@ -19,6 +18,10 @@ loadSprite("apple", "./sprites/apple.png");
 loadSprite("owo", "./sprites/owo.png");
 loadSprite("roblox", "./sprites/roblox.png");
 loadSprite("juizy", "./sprites/juizy.png");
+loadSprite("portal", "./sprites/portal.png");
+loadSprite("xd", "./sprites/xd.png")
+loadSprite("zelda", "./sprites/zelda.png");;
+loadSprite("sus", "./sprites/sus.png");
 loadSprite("eww_0", "./sprites/eww_0.png");
 loadSprite("eww_1", "./sprites/eww_1.png");
 loadSprite("eww_2", "./sprites/eww_2.png");
@@ -32,9 +35,25 @@ loadSprite("explosion", "./sprites/explosion.png", {
 			to: 3
 		}
 	}
-})
+});
+
+loadSprite("trash_explosion", "./sprites/trash_explosion.png", {
+	sliceX: 2,
+	sliceY: 2,
+	anims: {
+		main: {
+			from: 0,
+			to: 3
+		}
+	}
+});
+
 
 // Load souds
+
+var musicVolume = 1;
+
+//
 
 loadSound("piu", "./sounds/shoot.wav");
 loadSound("boom", "./sounds/explosion.wav");
@@ -45,7 +64,7 @@ loadSound("sot", "./sounds/saber_of_truth.mp3");
 
 scene("tutorial", () => {
 	add([
-		text("Keys", 30),
+		text("NrmAE2", 35),
 		pos(width() / 2, 40),
 		origin("center")
 	])
@@ -77,6 +96,12 @@ scene("tutorial", () => {
 	add([
 		text("Backspace for start!", 13),
 		pos(width() / 2, height() - 30),
+		origin("center")
+	])
+
+	add([
+		text("[M to mute music]", 13),
+		pos(width() / 2, height() - 5),
 		origin("center")
 	])
 
@@ -146,6 +171,7 @@ scene("main", () => {
 
 	const music = play("sot");
 	music.loop();
+	music.volume(musicVolume);
 
 	const player = add([
 		sprite("stiven"),
@@ -163,7 +189,6 @@ scene("main", () => {
 
 		if (player.pos.x < 0) {
 			camShake(15);
-			// postScore("Scores", score.value);
 			player.changeSprite("explosion");
 			player.play("main");
 			music.stop()
@@ -176,15 +201,22 @@ scene("main", () => {
 			})
 
 			wait(1.7, () => {
-				if(score.value > 100) go("lose", {score:score.value});
+				if (score.value > 100) go("lose", { score: score.value });
 				else go("main");
 			})
 		}
 	})
 
+	add([
+		sprite("apple"),
+		pos(6, 2.4),
+		scale(0.7),
+		layer("ui")
+	]);
+
 	const score = add([
 		text("0", 15),
-		pos(4, 4),
+		pos(30, 7),
 		layer("ui"),
 		{
 			value: 0,
@@ -213,17 +245,20 @@ scene("main", () => {
 	// Spawn Trash
 
 	loop(rand(0.2, 0.6), () => {
-		var theTrash = choose(["glass", "apple", "owo", "roblox", "juizy"])
+		var theTrash = choose(["glass", "apple", "owo", "roblox", "juizy", "sus", "portal", "zelda", "xd"])
 		add([
 			sprite(theTrash),
 			pos(width() + 30, rand(0, height())),
 			rotate(rand(0, 180)),
 			origin("center"),
-			'trash'
+			'trash',
+			{ dead: false }
 		])
 	})
 
 	action('trash', (t) => {
+		if (t.dead) return;
+
 		t.move(-trashSpeed * rand(1, 1.5), 0);
 
 		if (t.pos.x < 0) {
@@ -254,7 +289,10 @@ scene("main", () => {
 	// Collisions
 
 	player.collides("trash", (p) => {
+		if (p.dead) return;
+
 		destroy(p);
+
 		camShake(15);
 		// postScore("Scores", score.value);
 		player.changeSprite("explosion");
@@ -269,7 +307,7 @@ scene("main", () => {
 		})
 
 		wait(1.7, () => {
-			if(score.value > 100) go("lose", {score:score.value});
+			if (score.value > 100) go("lose", { score: score.value });
 			else go("main");
 		})
 	})
@@ -280,11 +318,16 @@ scene("main", () => {
 			volume: 0.4
 		});
 		destroy(b);
-		destroy(t);
+		t.dead = true;
+		t.changeSprite("trash_explosion");
+		t.play("main");
 
-		if (trashSpeed < 500) trashSpeed += 2
- 		if (recoil < 50) recoil += 0.3;
+		wait(0.3, () => destroy(t));
+
+		if (trashSpeed < 500) trashSpeed++
+		if (recoil < 50) recoil += 0.3;
 		if (backgroundSpeed < 200) backgroundSpeed++;
+		if (player.speed < 300) player.speed += 0.5;
 
 		score.value += 1;
 		score.text = score.value;
@@ -328,9 +371,20 @@ scene("main", () => {
 			shoot(player.pos);
 		}
 	})
+
+	keyPress("m", () => {
+		if (music.volume() == 0) {
+			music.volume(1);
+			musicVolume = 1;
+		} else {
+			music.volume(0)
+			musicVolume = 0;
+		};
+	});
+
 });
 
-scene("lose", ({score}) => {
+scene("lose", ({ score }) => {
 	add([
 		text("Your Score: " + score, 12),
 		origin("center"),
@@ -342,6 +396,85 @@ scene("lose", ({score}) => {
 		origin("center"),
 		pos(width() / 2, 200)
 	])
+
+	if (score >= 100 && score < 200) {
+		add([
+			text("Thats all?", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
+	else if (score >= 200 && score < 300) {
+		add([
+			text("My cousin without arms plays better", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
+	else if (score >= 300 && score < 400) {
+		add([
+			text("Youre almost there, maybe spamming doesnt work that well.", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
+	else if (score >= 400 && score < 500) {
+		add([
+			text("Ugh", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
+	else if (score >= 500 && score < 1000) {
+		add([
+			text("It's fine. I guess, 'juicy', please die already.", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
+	else if (score >= 1000 && score < 2000) {
+		add([
+			text("Stop playing the game, put your 5 star shit down and go.", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
+	else if (score >= 2000 && score < 3000) {
+		add([
+			text("You're being quite annoying, could you stop looking for my texts, ok? I won't say anything else, just give up.", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
+	else if (score >= 3000 && score < 4000) {
+		add([
+			text("Final warning. Go and send kisses to your mother on behalf of the Narrator.", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
+	else if (score >= 4000 && score < 5000) {
+		add([
+			text("Look behind you.", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+
+		wait(0.5, () => {
+			add([
+				text("Stupid.", 10, {width: 250}),
+				origin("center"),
+				pos(width() / 2, 70)
+			])
+		})
+	}
+	else if (score >= 5000) {
+		add([
+			text("Please apologize for any inconvenience caused to you. Please continue to play Lajbel Studios with good intentions.", 10, {width: 250}),
+			origin("center"),
+			pos(width() / 2, 50)
+		])
+	}
 
 	keyPress("space", () => {
 		go("main");
