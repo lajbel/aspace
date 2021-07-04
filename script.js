@@ -470,7 +470,7 @@ scene("lose", ({ score }) => {
 	}
 	else if (score >= 5000) {
 		add([
-			text("Please apologize for any inconvenience caused to you. Please continue to play Lajbel Studios with good intentions.", 10, {width: 250}),
+			text("Please apologize for any inconvenience caused to you. Please continue to play - LaJBel Studio.", 10, {width: 250}),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
