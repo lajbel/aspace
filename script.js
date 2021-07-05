@@ -51,7 +51,7 @@ const loadAssets = async () => {
 		}
 	});
 
-	await Newgrounds.Init("52359:F96M7PDc", "ywgsnAGKLvovlzSXKltFKA==");
+	await Newgrounds.Init("secret", "u");
 }
 
 loadAssets()
