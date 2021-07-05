@@ -1,3 +1,5 @@
+// Kaboom Context
+
 kaboom({
 	global: true,
 	width: 330,
@@ -10,43 +12,49 @@ kaboom({
 
 // Load sprites
 
-loadSprite("stiven", './sprites/stiven.png');
-loadSprite("background", "./sprites/background.png");
-loadSprite("glass", "./sprites/glass.png");
-loadSprite("bullet", "./sprites/bullet.png");
-loadSprite("apple", "./sprites/apple.png");
-loadSprite("owo", "./sprites/owo.png");
-loadSprite("roblox", "./sprites/roblox.png");
-loadSprite("juizy", "./sprites/juizy.png");
-loadSprite("portal", "./sprites/portal.png");
-loadSprite("xd", "./sprites/xd.png")
-loadSprite("zelda", "./sprites/zelda.png");;
-loadSprite("sus", "./sprites/sus.png");
-loadSprite("eww_0", "./sprites/eww_0.png");
-loadSprite("eww_1", "./sprites/eww_1.png");
-loadSprite("eww_2", "./sprites/eww_2.png");
+const loadAssets = async () => {
+	await loadSprite("stiven", './sprites/stiven.png');
+	await loadSprite("background", "./sprites/background.png");
+	await loadSprite("glass", "./sprites/glass.png");
+	await loadSprite("bullet", "./sprites/bullet.png");
+	await loadSprite("apple", "./sprites/apple.png");
+	await loadSprite("owo", "./sprites/owo.png");
+	await loadSprite("roblox", "./sprites/roblox.png");
+	await loadSprite("juizy", "./sprites/juizy.png");
+	await loadSprite("portal", "./sprites/portal.png");
+	await loadSprite("xd", "./sprites/xd.png")
+	await loadSprite("zelda", "./sprites/zelda.png");;
+	await loadSprite("sus", "./sprites/sus.png");
+	await loadSprite("eww_0", "./sprites/eww_0.png");
+	await loadSprite("eww_1", "./sprites/eww_1.png");
+	await loadSprite("eww_2", "./sprites/eww_2.png");
 
-loadSprite("explosion", "./sprites/explosion.png", {
-	sliceX: 2,
-	sliceY: 2,
-	anims: {
-		main: {
-			from: 0,
-			to: 3
+	await loadSprite("explosion", "./sprites/explosion.png", {
+		sliceX: 2,
+		sliceY: 2,
+		anims: {
+			main: {
+				from: 0,
+				to: 3
+			}
 		}
-	}
-});
+	});
 
-loadSprite("trash_explosion", "./sprites/trash_explosion.png", {
-	sliceX: 2,
-	sliceY: 2,
-	anims: {
-		main: {
-			from: 0,
-			to: 3
+	await loadSprite("trash_explosion", "./sprites/trash_explosion.png", {
+		sliceX: 2,
+		sliceY: 2,
+		anims: {
+			main: {
+				from: 0,
+				to: 3
+			}
 		}
-	}
-});
+	});
+
+	await Newgrounds.Init("52359:F96M7PDc", "ywgsnAGKLvovlzSXKltFKA==");
+}
+
+loadAssets()
 
 
 // Load souds
@@ -188,6 +196,8 @@ scene("main", () => {
 		player.move(-recoil, 0);
 
 		if (player.pos.x < 0) {
+			Newgrounds.PostScore(0, score.value);
+
 			camShake(15);
 			player.changeSprite("explosion");
 			player.play("main");
@@ -235,6 +245,8 @@ scene("main", () => {
 				origin("center"),
 				layer("ui")
 			])
+
+			Newgrounds.UnlockMedal(0);
 
 			wait(5, () => {
 				destroy(winText)
@@ -291,10 +303,10 @@ scene("main", () => {
 	player.collides("trash", (p) => {
 		if (p.dead) return;
 
+		Newgrounds.PostScore(0, score.value);
 		destroy(p);
 
 		camShake(15);
-		// postScore("Scores", score.value);
 		player.changeSprite("explosion");
 		player.play("main");
 		music.stop()
@@ -379,6 +391,7 @@ scene("main", () => {
 		} else {
 			music.volume(0)
 			musicVolume = 0;
+			Newgrounds.UnlockMedal(1);
 		};
 	});
 
@@ -399,70 +412,70 @@ scene("lose", ({ score }) => {
 
 	if (score >= 100 && score < 200) {
 		add([
-			text("Thats all?", 10, {width: 250}),
+			text("Thats all?", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 	}
 	else if (score >= 200 && score < 300) {
 		add([
-			text("My cousin without arms plays better", 10, {width: 250}),
+			text("My cousin without arms plays better", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 	}
 	else if (score >= 300 && score < 400) {
 		add([
-			text("Youre almost there, maybe spamming doesnt work that well.", 10, {width: 250}),
+			text("Youre almost there, maybe spamming doesnt work that well.", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 	}
 	else if (score >= 400 && score < 500) {
 		add([
-			text("Ugh", 10, {width: 250}),
+			text("Ugh", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 	}
 	else if (score >= 500 && score < 1000) {
 		add([
-			text("It's fine. I guess, 'juicy', please die already.", 10, {width: 250}),
+			text("It's fine. I guess, 'juicy', please die already.", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 	}
 	else if (score >= 1000 && score < 2000) {
 		add([
-			text("Stop playing the game, put your 5 star shit down and go.", 10, {width: 250}),
+			text("Stop playing the game, put your 5 star shit down and go.", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 	}
 	else if (score >= 2000 && score < 3000) {
 		add([
-			text("You're being quite annoying, could you stop looking for my texts, ok? I won't say anything else, just give up.", 10, {width: 250}),
+			text("You're being quite annoying, could you stop looking for my texts, ok? I won't say anything else, just give up.", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 	}
 	else if (score >= 3000 && score < 4000) {
 		add([
-			text("Final warning. Go and send kisses to your mother on behalf of the Narrator.", 10, {width: 250}),
+			text("Final warning. Go and send kisses to your mother on behalf of the Narrator.", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 	}
 	else if (score >= 4000 && score < 5000) {
 		add([
-			text("Look behind you.", 10, {width: 250}),
+			text("Look behind you.", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
 
 		wait(0.5, () => {
 			add([
-				text("Stupid.", 10, {width: 250}),
+				text("Stupid.", 10, { width: 250 }),
 				origin("center"),
 				pos(width() / 2, 70)
 			])
@@ -470,7 +483,7 @@ scene("lose", ({ score }) => {
 	}
 	else if (score >= 5000) {
 		add([
-			text("Please apologize for any inconvenience caused to you. Please continue to play - LaJBel Studio.", 10, {width: 250}),
+			text("Please apologize for any inconvenience caused to you. Please continue to play - LaJBel Studio.", 10, { width: 250 }),
 			origin("center"),
 			pos(width() / 2, 50)
 		])
