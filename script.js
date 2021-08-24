@@ -7,6 +7,7 @@ kaboom({
 	width: 330,
 	height: 250,
 	scale: 2,
+    canvas: document.getElementById("canvasGame"),
 	clearColor: [0, 0, 0, 5],
 	fullscreen: false,
 	debug: true,
@@ -97,7 +98,7 @@ scene("newgrounds", () => {
 	});
 
 	action(() => {
-		if (keyIsPressed("space") && !isStart) {
+		if (keyIsPressed("space")) {
 			go("tutorial");
 		};
 	});
@@ -446,6 +447,11 @@ scene("main", () => {
 				musicVolume = 0;
 				Newgrounds.UnlockMedal(1);
 			};
+		}
+		
+		if (keyIsPressed("escape")) {
+			music.stop()
+			go("tutorial");
 		};
 	});
 });

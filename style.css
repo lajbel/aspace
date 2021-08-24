@@ -1,5 +1,11 @@
+* {
+	padding: 0px;
+	margin: 0px;
+}
+
 body {
+	width: 680;
+	height: 500;
 	display: flex;
 	justify-content: center;
-	background-color: rgb(19, 19, 19);
 }
