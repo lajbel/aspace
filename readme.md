@@ -2,7 +2,7 @@
 
 Destroy the garbage, this is a mini-game shooter originally made in kaboomjs 5.0, this is my first "original" game, enjoy it!
 
-Version 1: a5c3785ed8d6a35868bc169f07e40e889087fd2e <br>
+Version 1: https://github.com/lajbel/aspace/commit/b2e3946df073938e0d72059ee4cd7c427a9e28ce <br> 
 Version 2: Soon
 
 ### Play
