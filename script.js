@@ -1,16 +1,19 @@
-Newgrounds.Init("secret", "u");
+// Import components and plugins
 
-// Kaboom Context
+import { realRgbPlugin } from "./plugins/realRGB.js";
+import { blink } from "./plugins/components/blink.js";
+
+// Init game
 
 kaboom({
 	global: true,
 	width: 330,
-	height: 250,
+	height: 290,
 	scale: 2,
     canvas: document.getElementById("canvasGame"),
-	clearColor: [0, 0, 0, 5],
-	fullscreen: false,
 	debug: true,
+    plugins: [realRgbPlugin],
+	clearColor: [0, 0, 0, 5],
 });
 
 // Load assets
@@ -35,49 +38,23 @@ loadSprite("sus", "./sprites/sus.png");
 loadSprite("eww_0", "./sprites/eww_0.png");
 loadSprite("eww_1", "./sprites/eww_1.png");
 loadSprite("eww_2", "./sprites/eww_2.png");
-loadSprite("explosion", "./sprites/explosion.png", {
-	sliceX: 2,
-	sliceY: 2,
-	anims: {
-		main: {
-			from: 0,
-			to: 3
-		}
-	}
-});
-loadSprite("trash_explosion", "./sprites/trash_explosion.png", {
-	sliceX: 2,
-	sliceY: 2,
-	anims: {
-		main: {
-			from: 0,
-			to: 3
-		}
-	}
-});
-loadSprite("stiven", './sprites/stiven.png', {
-	sliceX: 3,
-	sliceY: 1,
-	anims: {
-		main: {
-			from: 0,
-			to: 2
-		}
-	}
-});
+loadSprite("explosion", "./sprites/explosion.png", { sliceX: 2, sliceY: 2, anims: { main: { from: 0, to: 3} }});
+loadSprite("trash_explosion", "./sprites/trash_explosion.png", { sliceX: 2, sliceY: 2, anims: { main: { from: 0, to: 3} }});
+loadSprite("stiven", './sprites/stiven.png', { sliceX: 3, sliceY: 1, anims: { main: { from: 0, to: 2 } }});
 
-// Global Variables
+// Global Variable
 
-var musicVolume = 1;
+let musicVolume = 1;
 
-// Splash ng
+// Splash 
 
 scene("newgrounds", () => {
-	var show = false; 
+	let show = false; 
 
 	const ng = add([
 		sprite("newgrounds"),
 		origin("center"),
+        scale(0.5),
 		color(1, 1, 1, 0),
 		pos(width() / 2, height() / 2)
 	]);
@@ -94,23 +71,23 @@ scene("newgrounds", () => {
 
 		ng.color.a -= 0.01;
 
-		if(ng.color.a <= 0) wait(0.1, () => go("tutorial"));
+		if(ng.color.a <= 0) wait(0.1, () => go("menu"));
 	});
 
 	action(() => {
 		if (keyIsPressed("space")) {
-			go("tutorial");
+			go("menu");
 		};
 	});
-})
+});
 
-// Menu and Tutorial
+// Menu
 
-scene("tutorial", () => {
-	var isStart = false;
+scene("menu", () => {
+	let keyAlreadyPressed = false;
 
 	add([
-		text("Nrm:AE2", 30),
+		text("Aspace", 30),
 		pos(width() / 2, 40),
 		origin("center")
 	]);
@@ -145,64 +122,136 @@ scene("tutorial", () => {
 		origin("center")
 	]);
 
-	var startText = add([
-		text("Backspace for start!", 13),
+	const startText = add([
+		text("Press any key for start", 11),
 		pos(width() / 2, height() - 30),
-		origin("center")
+		origin("center"),
+        blink(0.2)
 	]);
 
-	loop(0.2, () => {
-		if(isStart) return;
-
-		startText.hidden = !startText.hidden;
-	});
-
-	// Input for Menu
-
 	action(() => {
-		if (keyIsPressed("space") && !isStart) {
-			isStart = true;
-			
-			play("start");
-			loop(0.1, () => startText.hidden = !startText.hidden);
-			wait(2, () => go("main"));
+		if (keyIsPressed("space") && !keyAlreadyPressed) {
+            keyAlreadyPressed = true;
+            play("start");
+			startText.use(blink(0.1));
+            
+			wait(2, () => go("game"));
 		};
 	});
 })
 
-// Game scene
+// Game
 
-scene("main", () => {
-	var bulletSpeed = 300;
-	var backgroundSpeed = 60;
-	var RECOIL = 10;
-	var trashSpeed = 200;
-	var win = 0;
+scene("game", () => {
+    // Scene Variables 
 
-	layers(["bg", "ewws", "game", "ui"], "game");
-	camIgnore(["ui"]);
+	let bulletSpeed = 300;
+	let backgroundSpeed = 60;
+	const DEFAULT_RECOIL = 10;
+    const SHOOT_DELAY = 0.3;
+	let trashSpeed = 200;
+
+    let music = play("sot");
+	music.loop();
+	music.volume(musicVolume);
+
+	layers(["bg", "ewws", "game", "ui", "score"], "game");
+    camIgnore(["ui"]);
 	volume(1);
+
+    // Backgrounds
 	
 	add([
-		sprite("background", {noArea: true}),
+		sprite("background"),
 		layer("bg"),
 		pos(0, 0),
 		"background"
 	]);
 
 	add([
-		sprite("background", {noAarea: true}),
+		sprite("background"),
 		pos(width() * 2, 0),
 		layer("bg"),
 		"background",
 	]);
 
+    // UI
 
-	loop(2, () => {
-		var theEww = choose(["eww_0", "eww_1", "eww_2"])
+    add([
+        rect(width(), 30),
+        pos(0, 0),
+        color(realRgb(143, 227, 255)),
+        layer("ui")
+    ]);
+
+    const score = add([
+		text("0", 17),
+        origin("center"),
+		pos(width() / 2, 15),
+		layer("score"),
+		{
+			value: 0,
+		},
+	]);
+
+    // Player
+
+	const player = add([
+		sprite("stiven"),
+        scale(1.2),
+        origin("center"),		
+		area(vec2(10, 6), vec2(-9, -5)),
+        pos(25, height() / 2),
+		{
+			speed: 200,
+			lastShoot: 0,
+			recoil: DEFAULT_RECOIL,
+		}
+	]);
+
+	player.play("main");
+
+    // Shoot 
+
+    player.shoot = () => {
+        if(!(time() > player.lastShoot + SHOOT_DELAY)) return;
+
+        add([
+			sprite("bullet"),
+			scale(0.5),
+            origin("right"),
+			pos(player.pos.x, player.pos.y + 2),
+            area(),
+			"bullet",
+		]);
+
+		play("piu", { volume: 0.4 });
+		readd(player);
+        player.lastShoot = time();
+    };
+
+	
+
+	// Spawns
+
+	loop(0.4, () => {
+		let trash = choose(["glass", "apple", "owo", "roblox", "juizy", "sus", "portal", "zelda", "xd"]);
 
 		add([
-			sprite(theEww, {noArea: true}),
+			sprite(trash),
+            rotate(rand(0, deg2rad(360))),
+			origin("center"),
+			pos(width() + 30, rand(0, height())),
+			area(),
+			'trash',
+		]);
+	})
+
+    loop(2, () => {
+		let eww = choose(["eww_0", "eww_1", "eww_2"])
+
+		add([
+			sprite(eww),
 			pos(width() + 100, rand(0, height())),
 			layer("ewws"),
 			rotate(rand(0, 360)),
@@ -212,84 +261,20 @@ scene("main", () => {
 		]);
 	});
 
-	var music = play("sot");
-	music.loop();
-	music.volume(musicVolume);
-
-	var player = add([
-		sprite("stiven"),
-		pos(25, height() / 2),
-		origin("center"),
-		scale(1.2),
-		area(vec2(10, 6), vec2(-9, -5)),
-		{
-			speed: 200,
-			lastShoot: 0,
-			recoil: RECOIL,
-			shoot: () => {
-				add([
-					sprite("bullet"),
-					scale(0.5),
-					pos(player.pos.x, player.pos.y + 2),
-					origin("center"),
-					"bullet",
-				]);
-
-				play("piu", { volume: 0.3 });
-				readd(player);
-			}
-		}
-	]);
-
-	player.play("main");
-
-	add([
-		sprite("apple"),
-		pos(6, 2.4),
-		scale(0.7),
-		layer("ui")
-	]);
-
-	const score = add([
-		text("0", 15),
-		pos(30, 7),
-		layer("ui"),
-		{
-			value: 0,
-		},
-	]);
-
-	// Spawn Trash
-
-	loop(rand(0.2, 0.6), () => {
-		var theTrash = choose(["glass", "apple", "owo", "roblox", "juizy", "sus", "portal", "zelda", "xd"]);
-
-		add([
-			sprite(theTrash),
-			pos(width() + 30, rand(0, height())),
-			rotate(rand(0, 180)),
-			origin("center"),
-			'trash',
-		]);
-	})
-
-	// Shoot
-
-	function shoot(p) {
-		add([
-			sprite("bullet"),
-			scale(0.5),
-			pos(p),
-			origin("center"),
-			"bullet",
-		]);
-	}
-
 	// Collisions
 
 	collides("bullet", "trash", (b, t) => {
+        const scoreForAdd = Number(rand(2, 8).toFixed(0));
+
 		destroy(b);
 		t.trigger("death");
+ 
+        score.value += scoreForAdd;
+		score.text = score.value;
+        score.use(scale(1.1));
+        score.use(scale(1.2));
+
+        wait(0.1, () => score.use(scale(1)));
 	});
 
 	// Actions 
@@ -335,19 +320,10 @@ scene("main", () => {
 		};
 	});
 
-	score.action(() => {
-		if (score.value == 500 && win == 0) win = true;
-
-		if (win == true) {
-			win = false;
-			Newgrounds.UnlockMedal(0);
-		};
-	});
-
 	// Events
 
 	on("death", "trash", (t) => {
-		camShake(2);
+		shake(2);
 
 		var anim = add([
 			sprite("trash_explosion"),
@@ -364,15 +340,13 @@ scene("main", () => {
 		if (player.recoil < 30) player.recoil += 0.1;
 		if (backgroundSpeed < 200) backgroundSpeed + 0.7;
 		if (player.speed < 300) player.speed += 0.2;
-
-		score.value += 1;
-		score.text = score.value;
 	});
 
 	player.on("death", () => {
-		Newgrounds.PostScore(0, score.value);
+		// (post scores) //
+
 		music.stop()
-		camShake(15);
+		shake(15);
 
 		var anim = add([
 			sprite("explosion"),
@@ -388,8 +362,8 @@ scene("main", () => {
 		wait(0.3, () => { destroy(anim); });
 
 		wait(1.7, () => {
-			if (score.value > 100) go("lose", { score: score.value });
-			else go("main");
+			if (score.value > 100) go("loose", { score: score.value });
+			else go("game");
 		});
 	});
 
@@ -431,32 +405,29 @@ scene("main", () => {
 			};
 		};
 
-		if (keyIsPressed("space") && player.exists() && time() > player.lastShoot + 0.1) {
-			if (player.exists()) {
-				player.lastShoot = time();
-				player.shoot();
-			};
+		if (keyIsPressed("space") && player.exists()) {		
+			player.shoot();
 		};
 
 		if (keyIsPressed("m")) {
 			if (music.volume() == 0) {
 				music.volume(1);
-				musicVolume = 1;
+                musicVolume = 1;
 			} else {
 				music.volume(0)
 				musicVolume = 0;
-				Newgrounds.UnlockMedal(1);
+				// Earn medal (?)
 			};
 		}
 		
 		if (keyIsPressed("escape")) {
 			music.stop()
-			go("tutorial");
+			go("menu");
 		};
 	});
 });
 
-scene("lose", ({ score }) => {
+scene("loose", ({ score }) => {
 	add([
 		text("Your Score: " + score, 12),
 		origin("center"),
@@ -469,88 +440,9 @@ scene("lose", ({ score }) => {
 		pos(width() / 2, 200)
 	])
 
-	if (score >= 100 && score < 200) {
-		add([
-			text("Thats all?", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-	else if (score >= 200 && score < 300) {
-		add([
-			text("My cousin without arms plays better", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-	else if (score >= 300 && score < 400) {
-		add([
-			text("Youre almost there, maybe spamming doesnt work that well.", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-	else if (score >= 400 && score < 500) {
-		add([
-			text("Ugh", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-	else if (score >= 500 && score < 1000) {
-		add([
-			text("It's fine. I guess, 'juicy', please die already.", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-	else if (score >= 1000 && score < 2000) {
-		add([
-			text("Stop playing the game, put your 5 star shit down and go.", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-	else if (score >= 2000 && score < 3000) {
-		add([
-			text("You're being quite annoying, could you stop looking for my texts, ok? I won't say anything else, just give up.", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-	else if (score >= 3000 && score < 4000) {
-		add([
-			text("Final warning. Go and send kisses to your mother on behalf of the Narrator.", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-	else if (score >= 4000 && score < 5000) {
-		add([
-			text("Look behind you.", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-
-		wait(0.5, () => {
-			add([
-				text("Stupid.", 10, { width: 250 }),
-				origin("center"),
-				pos(width() / 2, 70)
-			])
-		})
-	}
-	else if (score >= 5000) {
-		add([
-			text("Please apologize for any inconvenience caused to you. Please continue to play - LaJBel Studio.", 10, { width: 250 }),
-			origin("center"),
-			pos(width() / 2, 50)
-		])
-	}
-
 	keyPress("space", () => {
-		go("main");
+		go("game");
 	})
 });
 
-start("newgrounds");
+go("menu");
