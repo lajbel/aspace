@@ -9,11 +9,9 @@ kaboom({
 	global: true,
 	width: 330,
 	height: 250,
-    scale: 2,
+    scale: 4,
     canvas: document.getElementById("canvasGame"),
 	debug: true,
-    stretch: true,
-    letterbox: true,
     plugins: [realRgbPlugin],
 	clearColor: [0, 0, 0, 5],
 });
