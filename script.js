@@ -8,10 +8,12 @@ import { blink } from "./plugins/components/blink.js";
 kaboom({
 	global: true,
 	width: 330,
-	height: 290,
-	scale: 2,
+	height: 250,
+    scale: 2,
     canvas: document.getElementById("canvasGame"),
 	debug: true,
+    stretch: true,
+    letterbox: true,
     plugins: [realRgbPlugin],
 	clearColor: [0, 0, 0, 5],
 });
@@ -55,7 +57,7 @@ scene("newgrounds", () => {
 		sprite("newgrounds"),
 		origin("center"),
         scale(0.5),
-		color(1, 1, 1, 0),
+		color(rgba(1, 1, 1, 0)),
 		pos(width() / 2, height() / 2)
 	]);
 
@@ -66,16 +68,8 @@ scene("newgrounds", () => {
 		else ng.color.a += 0.01;
 	});
 
-	loop(0.01, () => {
-		if(!show) return;
-
-		ng.color.a -= 0.01;
-
-		if(ng.color.a <= 0) wait(0.1, () => go("menu"));
-	});
-
 	action(() => {
-		if (keyIsPressed("space")) {
+		if (keyIsPressed()) {
 			go("menu");
 		};
 	});
@@ -134,21 +128,26 @@ scene("menu", () => {
             keyAlreadyPressed = true;
             play("start");
 			startText.use(blink(0.1));
+
+            // Earn start archievement
             
 			wait(2, () => go("game"));
 		};
 	});
-})
+});
 
 // Game
 
 scene("game", () => {
     // Scene Variables 
 
+    const DEFAULT_RECOIL = 10;
+    const SHOOT_DELAY = 0.3;
+
+    let isDead = false;
+
 	let bulletSpeed = 300;
 	let backgroundSpeed = 60;
-	const DEFAULT_RECOIL = 10;
-    const SHOOT_DELAY = 0.3;
 	let trashSpeed = 200;
 
     let music = play("sot");
@@ -174,15 +173,6 @@ scene("game", () => {
 		layer("bg"),
 		"background",
 	]);
-
-    // UI
-
-    add([
-        rect(width(), 30),
-        pos(0, 0),
-        color(realRgb(143, 227, 255)),
-        layer("ui")
-    ]);
 
     const score = add([
 		text("0", 17),
@@ -343,10 +333,11 @@ scene("game", () => {
 	});
 
 	player.on("death", () => {
-		// (post scores) //
+		// (Post Scores and Archievements) //
 
-		music.stop()
-		shake(15);
+        isDead = true;
+        shake(15);
+		music.stop();
 
 		var anim = add([
 			sprite("explosion"),
@@ -358,7 +349,6 @@ scene("game", () => {
 		anim.play("main");
 
 		play("boom", {volume: 0.5});
-
 		wait(0.3, () => { destroy(anim); });
 
 		wait(1.7, () => {
@@ -405,7 +395,7 @@ scene("game", () => {
 			};
 		};
 
-		if (keyIsPressed("space") && player.exists()) {		
+		if (keyIsPressed("space") && !isDead) {		
 			player.shoot();
 		};
 
@@ -416,7 +406,6 @@ scene("game", () => {
 			} else {
 				music.volume(0)
 				musicVolume = 0;
-				// Earn medal (?)
 			};
 		}
 		

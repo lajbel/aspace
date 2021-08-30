@@ -9,7 +9,6 @@ Version 2: Soon
 
 [Newgrounds](https://www.newgrounds.com/portal/view/801948) <br>
 [Itch.io](https://lajbel.itch.io/aspace) <br>
-[LaJ Arcade (beta preview)](https://lajbel.repl.co/arcade/aspace)
 
 ### Made with
 
