@@ -9,7 +9,7 @@ kaboom({
 	global: true,
 	width: 330,
 	height: 250,
-    scale: 4,
+    scale: 2,
     canvas: document.getElementById("canvasGame"),
 	debug: true,
     plugins: [realRgbPlugin],
