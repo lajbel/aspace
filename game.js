@@ -1,18 +1,16 @@
 // Import components and plugins
 
-import { realRgbPlugin } from "./plugins/realRGB.js";
 import { blink } from "./plugins/components/blink.js";
+import { newgroundsPlugin } from "./plugins/newgrounds.js";
 
 // Init game
 
 kaboom({
-	global: true,
 	width: 330,
 	height: 250,
     scale: 2,
-    canvas: document.getElementById("canvasGame"),
-	debug: true,
-    plugins: [realRgbPlugin],
+    font: "sink",
+    plugins: [newgroundsPlugin],
 	clearColor: [0, 0, 0, 5],
 });
 
@@ -48,29 +46,33 @@ let musicVolume = 1;
 
 // Splash 
 
-scene("newgrounds", () => {
-	let show = false; 
+scene("splash", () => {
+	let show = false;
+    let splashTime = 0; 
 
 	const ng = add([
 		sprite("newgrounds"),
 		origin("center"),
-        scale(0.5),
-		color(rgba(1, 1, 1, 0)),
+		color(rgba(255, 255, 255, 0)),
+        area({cursor: "pointer"}),
+		scale(0.7),
 		pos(width() / 2, height() / 2)
 	]);
 
-	loop(0.01, () => {
-		if(show) return;
+    ng.action(() => {
+        if(time() > splashTime + 0.01 && !show) {
+            splashTime = time();
+            if(ng.color.a < 1) ng.color.a += 0.01;
+            else wait(2, () => show = true);
+        }
+        else {
+            if(ng.color.a > 0) ng.color.a -= 0.01;
+            else wait(1, () => go("game"));
+        };
 
-		if(ng.color.a >= 1) wait(1, () => show = true)
-		else ng.color.a += 0.01;
-	});
-
-	action(() => {
-		if (keyIsPressed()) {
-			go("menu");
-		};
-	});
+        if(keyIsPressed("space") || mouseIsClicked()) go("menu");
+        if(keyIsPressed("f")) fullscreen(!fullscreen());
+    });
 });
 
 // Menu
@@ -79,46 +81,46 @@ scene("menu", () => {
 	let keyAlreadyPressed = false;
 
 	add([
-		text("Aspace", 30),
+		text("Aspace", {size: 30}),
 		pos(width() / 2, 40),
 		origin("center")
 	]);
 
-	add([
-		text("Arrows or Wasd - Move", 10),
-		pos(width() / 2, 90),
+    add([
+		text("Destroy the garbage!", {size: 15}),
+		pos(width() / 2, 65),
 		origin("center")
 	]);
 
 	add([
-		text("Backspace - Shoot", 10),
+		text("Arrows or Wasd: Move", {size: 12}),
 		pos(width() / 2, 110),
 		origin("center")
 	]);
 
 	add([
-		text("M - Mute music", 10),
+		text("Backspace: Shoot", {size: 12}),
 		pos(width() / 2, 130),
 		origin("center")
 	]);
 
 	add([
-		text("Destroy the trash", 8),
+		text("M: Mute music", {size: 12}),
+		pos(width() / 2, 150),
+		origin("center")
+	]);
+
+    add([
+		text("F: Fullscreen", {size: 12}),
 		pos(width() / 2, 170),
 		origin("center")
 	]);
 
-	add([
-		text('500 points for the "final"', 8),
-		pos(width() / 2, 180),
-		origin("center")
-	]);
-
 	const startText = add([
-		text("Press any key for start", 11),
+		text("Press any key for start", {size: 15}),
 		pos(width() / 2, height() - 30),
 		origin("center"),
-        blink(0.2)
+        blink(0.3)
 	]);
 
 	action(() => {
@@ -127,18 +129,16 @@ scene("menu", () => {
             play("start");
 			startText.use(blink(0.1));
 
-            // Earn start archievement
-            
 			wait(2, () => go("game"));
 		};
+
+        if(keyIsPressed("f")) fullscreen(!fullscreen());
 	});
 });
 
 // Game
 
 scene("game", () => {
-    // Scene Variables 
-
     const DEFAULT_RECOIL = 10;
     const SHOOT_DELAY = 0.3;
 
@@ -152,9 +152,7 @@ scene("game", () => {
 	music.loop();
 	music.volume(musicVolume);
 
-	layers(["bg", "ewws", "game", "ui", "score"], "game");
-    camIgnore(["ui"]);
-	volume(1);
+	layers(["bg", "game", "ui"], "game");
 
     // Backgrounds
 	
@@ -172,11 +170,13 @@ scene("game", () => {
 		"background",
 	]);
 
+    // UI
+
     const score = add([
-		text("0", 17),
+		text("0", {size: 20, font: "sinko"}),
         origin("center"),
 		pos(width() / 2, 15),
-		layer("score"),
+		layer("ui"),
 		{
 			value: 0,
 		},
@@ -188,7 +188,7 @@ scene("game", () => {
 		sprite("stiven"),
         scale(1.2),
         origin("center"),		
-		area(vec2(10, 6), vec2(-9, -5)),
+		area({scale: 0.7}),
         pos(25, height() / 2),
 		{
 			speed: 200,
@@ -218,8 +218,6 @@ scene("game", () => {
         player.lastShoot = time();
     };
 
-	
-
 	// Spawns
 
 	loop(0.4, () => {
@@ -241,7 +239,7 @@ scene("game", () => {
 		add([
 			sprite(eww),
 			pos(width() + 100, rand(0, height())),
-			layer("ewws"),
+			layer("background"),
 			rotate(rand(0, 360)),
 			scale(rand(1, 3)),
 			origin("right"),
@@ -415,21 +413,27 @@ scene("game", () => {
 });
 
 scene("loose", ({ score }) => {
+    // Info
+    
 	add([
-		text("Your Score: " + score, 12),
+		text("Score:" + score, {size: 26, font:"sink", width: width()}),
 		origin("center"),
 		pos(width() / 2, 100),
 	]);
 
 	add([
-		text("Spacebar to restart", 16),
+		text("Space for restart", {size:16, font:"sink"}),
 		origin("center"),
+        blink(0.3),
 		pos(width() / 2, 200)
-	])
+	]);
 
-	keyPress("space", () => {
-		go("game");
-	})
+    // Input
+    
+    action(() => {
+        if(keyIsPressed("space")) go("game");
+        if(keyIsPressed("f")) fullscreen(!fullscreen()); 
+    });
 });
 
-go("menu");
+go("splash");
