@@ -3,7 +3,7 @@
 import { blink } from "./plugins/components/blink.js";
 import { newgroundsPlugin } from "./plugins/newgrounds.js";
 
-// Init game
+// Kaboom!!! //////////////////////////////////////////////////////////////////////////////////////////////
 
 kaboom({
 	width: 330,
@@ -14,13 +14,16 @@ kaboom({
 	clearColor: [0, 0, 0, 5],
 });
 
-// Load assets
+// Load Assets ////////////////////////////////////////////////////////////////////////////////////////////
+
+loadFont("unscii", "./fonts/unscii.png", 8, 8);
 
 loadSound("piu", "./sounds/shoot.wav");
 loadSound("boom", "./sounds/explosion.wav");
 loadSound("hit", "./sounds/hit.wav");
 loadSound("sot", "./sounds/saber_of_truth.mp3");
 loadSound("start", "./sounds/start.wav");
+
 loadSprite("newgrounds", "./sprites/newgrounds.png");
 loadSprite("background", "./sprites/background.png");
 loadSprite("glass", "./sprites/glass.png");
@@ -40,9 +43,11 @@ loadSprite("explosion", "./sprites/explosion.png", { sliceX: 2, sliceY: 2, anims
 loadSprite("trash_explosion", "./sprites/trash_explosion.png", { sliceX: 2, sliceY: 2, anims: { main: { from: 0, to: 3} }});
 loadSprite("stiven", './sprites/stiven.png', { sliceX: 3, sliceY: 1, anims: { main: { from: 0, to: 2 } }});
 
-// Global Variable
+// Global Variable ////////////////////////////////////////////////////////////////////////////////////////
 
 let musicVolume = 1;
+
+// Scenes /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Splash 
 
@@ -81,43 +86,43 @@ scene("menu", () => {
 	let keyAlreadyPressed = false;
 
 	add([
-		text("Aspace", {size: 30}),
+		text("Aspace", { size: 30, font: "unscii" }),
 		pos(width() / 2, 40),
 		origin("center")
 	]);
 
     add([
-		text("Destroy the garbage!", {size: 15}),
+		text("Destroy the garbage!", { size: 15, font: "unscii" }),
 		pos(width() / 2, 65),
 		origin("center")
 	]);
 
 	add([
-		text("Arrows or Wasd: Move", {size: 12}),
+		text("Arrows or Wasd: Move", { size: 12, font: "unscii"}),
 		pos(width() / 2, 110),
 		origin("center")
 	]);
 
 	add([
-		text("Backspace: Shoot", {size: 12}),
+		text("Backspace: Shoot", { size: 12, font: "unscii" }),
 		pos(width() / 2, 130),
 		origin("center")
 	]);
 
 	add([
-		text("M: Mute music", {size: 12}),
+		text("M: Mute music", {size: 12, font: "unscii" }),
 		pos(width() / 2, 150),
 		origin("center")
 	]);
 
     add([
-		text("F: Fullscreen", {size: 12}),
+		text("F: Fullscreen", {size: 12, font: "unscii"}),
 		pos(width() / 2, 170),
 		origin("center")
 	]);
 
 	const startText = add([
-		text("Press any key for start", {size: 15}),
+		text("press space for start", {size: 13, font: "unscii"}),
 		pos(width() / 2, height() - 30),
 		origin("center"),
         blink(0.3)
@@ -173,7 +178,7 @@ scene("game", () => {
     // UI
 
     const score = add([
-		text("0", {size: 20, font: "sinko"}),
+		text("0", {size: 20, font: "unscii"}),
         origin("center"),
 		pos(width() / 2, 15),
 		layer("ui"),
@@ -416,13 +421,13 @@ scene("loose", ({ score }) => {
     // Info
     
 	add([
-		text("Score:" + score, {size: 26, font:"sink", width: width()}),
+		text("Score:" + score, { size: 26, font: "unscii", width: width() }),
 		origin("center"),
 		pos(width() / 2, 100),
 	]);
 
 	add([
-		text("Space for restart", {size:16, font:"sink"}),
+		text("Space for restart", { size:16, font:"unscii" }),
 		origin("center"),
         blink(0.3),
 		pos(width() / 2, 200)
